@@ -8,16 +8,16 @@ class PassportProcessor {
     private val validFields = setOf("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")
 
     fun getValidCount(text: String): Int {
-        val passports = text.lines().fold(mutableListOf(Passport())) { list, line ->
+        val passports = text.lines().fold(listOf(Passport())) { list, line ->
             if (line.isBlank()) {
-                list.add(Passport())
+                return@fold list + Passport()
             } else {
                 val kvs = line.split(" ")
                 for (kv in kvs) {
                     list.last().fields[kv.split(":")[0]] = kv.split(":")[1]
                 }
+                return@fold list
             }
-            return@fold list
         }
         return passports.count { it.hasRequiredFields && it.fieldsFormatValid }
     }
@@ -28,7 +28,7 @@ class PassportProcessor {
             get() = fields.keys.containsAll(validFields)
         val fieldsFormatValid: Boolean
             get() = fields.all { (key, value) ->
-                return@all when (key) {
+                when (key) {
                     "byr" -> value.isInRange(1920..2002)
                     "iyr" -> value.isInRange(2010..2020)
                     "eyr" -> value.isInRange(2020..2030)
